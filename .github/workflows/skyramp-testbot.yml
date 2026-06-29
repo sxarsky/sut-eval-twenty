@@ -35,12 +35,25 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.skyramp-testbot-app-token.outputs.token }}
 
+      # Pull base images through Google's Docker Hub mirror to avoid rate limits
+      - name: Configure Docker Hub mirror
+        run: |
+          echo '{"registry-mirrors":["https://mirror.gcr.io"]}' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+
       - uses: skyramp/testbot@eval-sut
         with:
           skyrampLicenseFile: ${{ secrets.SKYRAMP_LICENSE_FILE }}
           anthropicApiKey: ${{ secrets.SKYRAMP_TESTBOT_API_KEY }}
           githubToken: ${{ steps.skyramp-testbot-app-token.outputs.token }}
           skyrampMcpVersion: v0.2.150-rc.ldw
-          sutSetupMode: 'adapt_workflow'
+          sutSetupMode: 'none'
           sutSourceWorkflowFile: '.github/workflows/ci-test-docker-compose.yaml'
           enableDebug: true
+          targetSetupCommand: 'docker builder prune -f && docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . up -d --build'
+          targetReadyCheckCommand: 'curl -sf http://localhost:3000/healthz'
+          targetReadyCheckTimeout: '1800'
+          targetReadyCheckDiagnosticsCommand: 'docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . ps && docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . logs --tail=100'
+          targetTeardownCommand: 'docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . down -v && docker builder prune -f'
+          authTokenCommand: 'bash .skyramp/sut/get-auth-token.sh'
+          uiCredentials: 'tim@apple.dev:tim@apple.dev'

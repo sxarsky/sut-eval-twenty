@@ -1,0 +1,26 @@
+name: twenty-testbot
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: packages/twenty-docker/twenty/Dockerfile
+      target: twenty-app-dev
+    ports:
+      - "3000:2020"
+    environment:
+      SERVER_URL: http://localhost:3000
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:2020/healthz"]
+      interval: 15s
+      timeout: 10s
+      retries: 60
+      start_period: 120s
+    volumes:
+      - twenty-testbot-data:/data/postgres
+      - twenty-testbot-storage:/app/packages/twenty-server/.local-storage
+    restart: "no"
+
+volumes:
+  twenty-testbot-data:
+  twenty-testbot-storage:

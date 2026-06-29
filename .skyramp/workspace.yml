@@ -1,0 +1,37 @@
+# Skyramp Workspace Configuration
+workspace:
+  repoName: sxarsky/sut-eval-twenty
+  repoUrl: https://github.com/sxarsky/sut-eval-twenty
+metadata:
+  schemaVersion: v1
+  executorVersion: v1.3.30
+  createdAt: "2026-06-29T18:49:08.056Z"
+  updatedAt: "2026-06-29T18:49:08.063Z"
+services:
+  - serviceName: twenty-server-backend
+    language: typescript
+    framework: playwright
+    testDirectory: tests/skyramp/twenty-server-backend
+    api:
+      schemaPath: http://localhost:3000/open-api/core
+      authType: bearer
+      authHeader: Authorization
+      baseUrl: http://localhost:3000
+    runtimeDetails:
+      serverStartCommand: docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . up -d --build
+      serverStopCommand: docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . down -v
+      runtime: docker
+      dockerNetwork: twenty-testbot_default
+  - serviceName: twenty-front-ui
+    language: typescript
+    framework: playwright
+    testDirectory: packages/twenty-e2e-testing/tests
+    api:
+      authType: bearer
+      authHeader: Authorization
+      baseUrl: http://localhost:3000
+    runtimeDetails:
+      serverStartCommand: docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . up -d --build
+      serverStopCommand: docker compose -f .skyramp/sut/docker-compose.testbot.yml --project-directory . down -v
+      runtime: docker
+      dockerNetwork: twenty-testbot_default
