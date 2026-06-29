@@ -246,6 +246,9 @@ export class ClientConfig {
   @Field(() => String, { nullable: true })
   appVersion?: string;
 
+  @Field(() => String, { nullable: true })
+  edition?: string;
+
   @Field(() => AuthProvidersDTO, { nullable: false })
   authProviders: AuthProvidersDTO;
 
